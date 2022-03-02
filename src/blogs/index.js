@@ -68,6 +68,7 @@ blogsRouter.post("/", blogValidator, (req, res, next) => {
 
 blogsRouter.put("/:blogId", (req, res, next) => {
   const index = blogsArray.findIndex((blog) => blog === req.params.blogId);
+
   const updatedBlog = {
     ...blogsArray[index],
     ...req.body,
