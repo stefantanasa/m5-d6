@@ -1,0 +1,161 @@
+## Video 1:
+
+API-Aplication Programming Interface
+REST - REpresentational State Transfer
+C-create
+R-read
+U-update
+D-delete
+
+# REST
+
+REpresentational State Transfer
+
+ExpressJS most popular Node framework
+
+Runs over HTTP and is used in Web api's
+
+API- Application Programing Interface
+
+## Video 2
+
+1. initiate project (npm init - y )
+2. install express (npm i express)
+3. create a file .gitignore inside it write node_modules/
+4. create a src folder
+5. create a server.js file inside src folder
+6. Add "type":"module" in package.json under "main": "lecture.js" to be able to use the import express on 7th step
+7. in server.js import express from 'express'
+8. to execute the server create a variable server = express()
+9. Add:
+   server.listen(3001, () => {
+   console.log("Server is working on the server 3001");
+   });
+   to make the server run on port 3001 and execute the second parameter (the function)
+
+10. To run the server write in the terminal node ./src/server.js but... there is an easier way.
+
+To restart the server every time we save we add another package named nodemon.
+
+11. Write in terminal npm i -D nodemon
+12. Add in package.json in scripts "dev":"nodemon -e js ./src/server.js"
+13. Make a new folder called /services and inside it make another folder for the endpoint /authors
+14. Inside /authors create a file index.js
+
+    Router - is subpart express app that contains a set of endpoints that share the same prefix (http://..../authors)
+
+INSIDE index.js:
+
+1. import express from 'express'
+2. create a router "authorRouter" = express.Router()
+3. remember to export it by : export default authorsRouter !!! VERY VERY IMPORTANT !!!
+
+ADDING THE ENDPOINTS
+
+- they need to be imported in the server.js to be used
+  - import authorsRouter from "./services/authors/index.js";
+  - server.use("/authors", authorsRouter);
+  - to see the endpoints :
+    -install npm i express-list-endpoints
+    -import listEndpoints from "express-list-endpoints";
+    -console.table(listEndpoints(server))
+
+1. authorsRouter.post("/", (req, res)=>{
+   res.status(200).send({message: "this is the server response to the post method"})
+
+   # to send back to the user a response
+
+   });
+
+2. authorsRouter.get("/", (req, res)=>{});
+3. authorsRouter.get("/:authorId", (req, res)=>{
+
+# Add some data to the auhtors.js to be able to see some data on .get method
+
+}); 4. authorsRouter.put("/:authorId", (req, res)=>{}); 5. authorsRouter.delete("/:authorId", (req, res)=>{});
+
+## Video 3
+
+# .getmethod:
+
+1.  import fs from fs (no need to be installed just import)
+2.  fs.readFileSync("path of the file")
+
+    # Find the path of the file:
+
+    1.  Start from the current file path (all these above the endpoints methods)
+
+        - import {fileURLToPath} from "url
+        - make a new var currentFilePath = fileURLToPath(import.meta.url)
+          - import.meta.url - finds the URL of the current file
+          - fileURLToPath() - transforms the file's url to a path
+
+    2.  Obtain the parent's folder path
+
+        - import {dirname} from 'path' to obtain the current's file's folder (dirname it is a core module )
+        - dirname("path of the current file") - currentFilePath gives the current folder's path
+
+    3.  Concatenate parent's folder path with the file name
+
+        - next to dirname import "join"
+        - join.(currentFolderPath, "name of the file.js /authors.json")
+
+          ## The authors file path steps can be included in a function to make the code reusable.
+
+                (to be replaced in the next day.)
+
+3.  fileContent = fs.readFileSync(currentJSONPath) - this will give a buffer (machine readable only)
+    - JSON.parse(fileContent) - it will return an array of the objects from the file (converts the buffer intro an array)
+
+## Video 4
+
+# .get method
+
+    read the content using json.parse(filecontent) otaining an array
+
+# .post method
+
+1. Read request body to obtain the new user's data
+   - in the server.js (before endpoints) add "server.use(express.json())", without this the req.body will return undefied
+   - req.body returns the body request
+2. Add some server generated infos to the body
+
+   - create newAuthor
+     -copy the req.body and add extra info if needed
+     - use uniqid () import uniqid from 'uniqid' --> uniqid())
+
+3. Add the new user to the file:
+
+   - read the file-> obtaining an array
+     array to be sent = json.parse(filecontent)
+
+   - add new uset to the array
+     push the newAuthor in it using .push
+
+   - write the new array to the file
+     write (overwrite) the array we made to the new file with fs.writeFileSync("file path", "the new array but stringified ")
+
+# .get (by id) method
+
+1. read the file content getting an array
+
+2. Find the specific user by id in the array
+   - NEW THING --> req.params.authorId
+     -to get the :userId we use the req.params.use_id === req.params.userId)
+     -send back the found user
+
+# .delete method
+
+1. read the file content getting an array
+2. filter out the author using .find but !==
+3. write back the new fileted array
+
+# .put method
+
+1. read the file ontent getting an array
+2. modify the specified user
+   - search for the index of the user using .findIndex()
+   - craft new user using spread operator: copy user at index and req.body
+3. save the file back with the updated users
+   contentArray[index] = new crafted body
+4. write back the contentArray (updated)

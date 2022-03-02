@@ -1,0 +1,70 @@
+## Lecture 1
+
+# CORS
+
+Cross
+Origin
+Resource
+Sharing
+
+1. Diferent enviroment need different configurations
+
+   secrets info can be hidden in enviroment variables, is a separate file not shared in the github. It will be ignored with .gitignore - .env
+   -Needs to be in the root of the project
+
+   .gitignore:
+
+   - node_module/
+   - .env
+
+# .ENV
+
+- inside .envwrite PORT = (any port value)
+- Put in server.js on port = process.env.PORT
+- in package.json tell to read the enviroment
+  -npm i -D dotenv
+  -add on dev: -r dotenv/config
+
+# Dependencies and devDependencies (?)
+
+DevDependencies are used in production, used locally. Used by developers in production.
+Dependencies are used everywhere / cloud server/ locally.
+
+## Lecture 2
+
+# Cors:
+
+    By default the browsers are blocking req that are not from the same origin.
+    Origin:
+        - different domains are different origin
+        - different porst are dif origin
+        - https and http are different origin
+
+To use cors in server write:
+
+- server.use(cors()) (everybody will have access to the apo)
+- inside cors():
+
+  - {origin: "the origin"} for one origin
+  - on origin value we can be added a list of origins
+  - or a function function(origin, next)
+    -provide a logic to check the origin
+    -search for the index of origin in the list of the accepted origins
+
+    in the logic put !origin || the logic... if origin not provided- allow it.
+
+- The accepted origins needs to be stored in .env
+
+## Cloud
+
+heroku.com is a PAS (Platform As a Service)
+
+automatic deploy- every time we push will deploy automatically the app in heroku
+
+## add in scripts "start": "node ./src/server.js"
+
+for front end we have: Vercel.com
+
+for storing files use Claudinary.com
+
+npm i multer-storage-cloudinary to upload to the cloudinary

@@ -1,0 +1,17 @@
+## 2nd video:
+
+---
+
+HTTP Response status code:
+
+> 200 ok
+> 201 created
+> 400 Bad Request
+> 401 Unauthorized
+> 404 Not found
+> 500 Internal server error
+
+## ##3rd video:
+
+NPM = Node Package Manager
+core modules( http, fs,...)

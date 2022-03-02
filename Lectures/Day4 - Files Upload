@@ -1,0 +1,72 @@
+# Video 1 - recap D3
+
+NodeJS -> file system
+ExpressJS -> uploading files
+
+# Video 2
+
+- npm i fs-extra is good because we can work with promises
+- make a new folder "lib" - new file fs-tools.js
+
+- import fs from 'fs-extra'
+- make a var for the data folder path and find the path
+- destructure fs -> {readJSON, writeJSON} = fs
+  - they can be used like that too:
+    - fs.readJSON()
+    - fs.writeJSON()
+- RECOMANDATION - make a folder special for data/json files
+- readJSON and writeJSON return promises and they will need to be inside an async functions.
+- in fs-tools definde function to read and write ex: const writeAuthor= (content => writeJSON(path of the file, content)) NO NEED TO PARSE OR STRINGIFY
+- to use these function they need to be imported and used in an async functi! !IMPORTANT!
+
+# Video 3
+
+- When uploading files the content type will be different than json files
+- We will use a special middleware to upload files (multer) -> npm i multer
+- make a folder for files and a index.js in it where we will define the router and the methods post using try-catch.. as normal
+- make sure in the route we have a async fct:
+  - async(req,res, next)
+- Do not forget to server.use("/upload", uploadRoute)
+- The middleware will be:
+  - multer().single() for uploading 1 file
+  - multer().array for uploading multiple files
+- single("name") needs a name !IMPORTANT! :
+  - MUST match exactly the name the frond ends sends. multer will not find the file otherways
+- when uploads the file it will return a buffer (hexadecimal encoded)
+  - we cannot do the same as the json buffer.toString()
+  - file needs to be saved in backend
+  - We need to make a public folder in the route of the project
+  - We can make other folders in it for a good organisaton
+  - We need to tell express we have a folder with files in it that needs to be accessed by the front end
+  - in server.js find the path of the public folder:
+    - join(process.cwd(), "./public):
+      - cwd = current working dirrectory, points where the package.js is
+      - in this way we can find the path for others files too
+    - server.use(express.static(path to the public folder))
+
+# Video 4
+
+- int the fe tools we need to write a function that saves the file in the folder we want:
+  - `import writeFile from fs too`
+  - write the function containing 2 parameters:
+    - filename
+    - content as a buffer
+  - So the function will look like that:
+    - (`filename`, `content` as a buffer)=> writeFile(join(pathToTheFolder, `filename`(param)), filename (param), `content`(param))
+    - the join part takes the link we want to make it to access the file including the filename.
+    - second parameter is the content file as a buffer
+- In the route :
+  - import the save function
+  - use the function in the method:
+    - `saveFunction(req.file.originalName, req.file.buffer)`
+      - REMEMBER:
+        - the path of the folder is already provided when we defined the function and the parameter is the original file name (req.file.originalName) to create the full address to the file
+        - second parameter is the content as a buffer( req.file.buffer)
+    - REMEMBRE:
+      - in postman the key needs to match the middleware name(`.singe(name)`).
+- Uploading multiple files (they need a different endpoint)
+  - Same as a single file but they will be found on req.files , plural
+  - To save multiple files we need to `map` them with `promiseAll`
+    - make a new var `req.files.map(file=>saveFunction(file.originalame, req.file.buffer`):
+      - NOTICE that we use the function to save a single file to save multiple files
+  - now just use `await promise.all(the map variable from above)`

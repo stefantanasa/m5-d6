@@ -1,0 +1,108 @@
+-new project npm init -y
+
+# Video 1
+
+Middlewares & error handling
+
+- express = require("express) and import express from "express" are the same thing but the 2nd is newest method
+- to use the new syntax we need to write "type":"module" in package.json
+
+more organized way to make the routes:
+
+- get the json path in one line:
+  jsonPath = join(dirname(fileURLToPath(import.meta.url)),"file.json")
+- Make a function to read the file and get an array:
+  getFile = ()=>JSON.parse(fs.readFileSync(jsonPath))
+  -Make a function to write to the file:
+- (content)=> fs.writeFileSync(fileURLToPath, JSON.stringify(content))
+
+# Queries:
+
+-on .get method we have queries
+link/books?category=horror --> {category: "horror"}
+inside method to get the queries we use:
+req.query to get them and filter the array with the queries.
+-check if there are queries and the query you are looking for with &&
+-Use if...else to filter
+array.filter(x=> query === x.query)...else...
+
+## Video 2 and 3
+
+1. Middlewares (they are functions)
+
+- (req, res, next) => {}
+- They can modigy the requests
+- Authentication in server.js - they need to be placed before the endpoits
+- Vlidation
+
+# Authentification
+
+goes in the server.js
+G.T.K -> req.method | req.url
+define a middlewhere and use it using:
+server.use(loggerMiddleware)
+now and is a global middleware
+Put next() at the end of middleware so the code can carry on
+
+There can be router middlewares, placed in server.js like that:
+server.use("/authors",routerMiddleware authorsRouter);
+
+## use cors to connect FE with BE. npi i cors--- import cors from 'cors'-- server.use(cors())
+
+## Error middlewhares -> (err, req, res, next)=>{}
+
+- They are functions
+- They need to be used AFTER the endpoints in server.js
+- Request handlers can send errors to error handlers by using next(err)
+
+---
+
+- Create a new file for errorHanders
+- Define error handler (err, req, res, next)=>{}
+- import err handler in server.js
+- server.use(generalErrorHandler) --AFTER the endpoints
+- In the route method use (req,res, next)=>{}
+- to catch errors use try, catch block
+- In errorHandlers we can have multiple error handlers
+- The errors handlers will be checked in waterfall order and the first that meets the status code is triggered
+
+# Video 4
+
+1. Error handlers triggers
+
+- error do not have such a err.status but...
+- we have a package that creates error.status for us
+  -npm install http-errors
+- In the error handler check for the err.status.
+- in the route methods use next(createHttpError(404, "message"))
+- this error will match the error status from the error handler
+
+---
+
+2. Validators (They are still middlewares)
+
+- npm i express-validator
+- make a new file validation.js as we did with errorHandlers
+  -inspects the req.body and checks if it has the requested fields
+- inside validation.js:
+
+  - import {body} from 'express-validator'
+  - export a list with the required fields using:
+    body("title".exists().withMessage("Title is a mandatory field"))
+
+- in index.js:
+
+  - import the newAuthorValidator from `./validator.js`
+  - import {validationResult} from `express-validator`
+  - the list of errors ( newAuthorValidator) is placed in the method's parameter.
+  - inside method:
+    const errorList = validationResult(req) - this will check the newAuthorValidator middleware
+  - check with if... else statement if list of error is empty:
+    errorList.isEmpty()...then...
+
+  - with body() we can check for more thinks like:
+    -emails
+    -credit card number
+    -number and so on
+    for ex: body("email").exists().withMessage("email required").isEmail().withMessage("The format is not right")
+    -type body().is and it will appear what you can check with this package.

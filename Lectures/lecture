@@ -1,0 +1,104 @@
+1.  npm init -y
+2.  npm i express
+3.  npm i -d nodemon
+4.  add "type": "module", into package.json
+    5.create .gitignore file
+    6.create a folder src-> server.js
+5.  in server.js write:
+    import express from "express";
+
+                    const server = express();
+
+                    server.listen(3001, () => {
+                    console.log("Server is running on port 3001");
+                    });
+
+6.
+
+- add "dev":"nodemon -e js ./src/server.js" to the package.json in scripts{} -
+
+- do not forget to add "type": "module" under the "main": "index.js"
+
+---------index.js-------
+
+1. create a router:
+   1.1 import express from 'express'
+   1.2 postsRouter = express.Router()
+   1.3 export default postsRouter;
+   1.4 postsRouter.get() ....and so on
+   1.5 in server.js import postsRouter + idex.js
+   1.6 in server.js add server.use("/prefix", postsRouter)
+   in the server.js (before endpoints) add "server.use(express.json())", without this the req.body will return undefied
+   \*\*\* install npm i express-list-endpoints, import listEndpoints in the server.js--> listEndpoints(server)
+
+2. How to get the .json path
+   2.0 import { fileURLToPath } from "url", make a new var pathToCurrent file = fileURLToPath(import.meta.url)
+   2.1 import { dirname } from "path"; make new var dirCurremtFile = dirname(pathToCurrent)
+   2.2 import join next to dirname and join Current folder to the posts.json
+   postsJSONPath = join(CurrentFolderPath, posts.json)
+
+3 How to read the file content:
+3.1 import fs from 'fs
+3.2 new var readFile= fs.readFileSync(.json path)
+3.3 new var contentOfFile= JSON.parse( readFile)
+
+--------------M5D4---------------------
+
+## recap:
+
+middleware: cors, validator, logger...
+
+middleware types:
+global: will execute everytime
+router: applied to the router, it will apply to the whole set (/books, /users, /authors)
+route level: aplies to one specific endpoint. (/:bookid, /:userId/id..)
+
+## New:
+
+fs-extra: install: npm i fs-extra
+
+make new folder--lib- new file inside fs-tools.js
+-import fs from 'fs-extra'
+
+         const {readJSON, writeJSON} = fs
+        getBooks =(=>readJSON(booksJSONPath)
+        writeBooks =(content)=>writeJSON(booksJSONPath, content)
+
+\*make a folder for data only (.json files)
+
+        import {fileURLToPath} from 'url'
+        import{join,dirname} from 'path'
+
+        dataFolderPath = join.(dirname(fileURLToPath(import.meta.url)), "../data")
+
+        "how to target books/users"
+
+        const booksJSONPath = join(dataFolderPath, "books.json")
+        const usersJSONPath = join(dataFolderPath, "users.json")
+
+import in index.js {writeBooks, getBooks} to use them there.
+
+## work in index.js:
+
+      using getBooks() returns a promise
+            !!! solution: all (req,  res,next) have to be async(req,res,next) and await getBooks()
+
+## uploading files:
+
+multipart/form-data
+
+multer--> npm i multer (for handling multipart/form-data)
+
+new folder (files) in the services and a new file index.js
+
+1. import express from 'express'
+   normal stuff, fileRouter, methods: get, post, put..
+   inform the server.js that we have another router filesRouter
+
+import multer from 'multer'
+
+this is a middleware
+multer().sigle() single files
+multer().array() more files
+
+process.cwd() --> gives nacl where the package.json is/ the route of the working project cwd-Current Working Directory
