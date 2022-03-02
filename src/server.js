@@ -9,17 +9,22 @@ import {
   genericErrorHandler,
 } from "./middlewares/errorHandlers.js";
 
-const getMiddleware = (req, res, next) => {
-  console.log(req);
+const getByIdMiddleware = (req, res, next) => {
+  console.log("get middleware");
 
   next();
 };
 const server = express();
-server.use(getMiddleware);
+server.use(getByIdMiddleware);
 const port = 3001;
 server.use(express.json());
 server.use("/authors", authorsRouters);
 server.use("/blogs", blogsRouters);
+
+server.use(badRequestHandler);
+server.use(unauthorizedHandler);
+server.use(notFoundHandler);
+server.use(genericErrorHandler);
 
 console.table(listEndpoints(server));
 server.listen(port, () => {

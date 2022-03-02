@@ -19,7 +19,6 @@ const writeBlogs = (content) =>
 
 blogsRouter.get("/", (req, res, next) => {
   const blogsFound = getBlogs();
-
   try {
     if (blogsFound.length === 0) {
       next(createHttpError(404, "Blogs not found"));
@@ -32,6 +31,7 @@ blogsRouter.get("/", (req, res, next) => {
   }
 });
 blogsRouter.get("/:blogId", (req, res, next) => {
+  const blogsArray = getBlogs();
   const foundBlog = blogsArray.find((blog) => blog.id === req.params.blogId);
 
   console.log("this is get by id method");
@@ -45,10 +45,11 @@ blogsRouter.get("/:blogId", (req, res, next) => {
     }
   }
 });
+
 blogsRouter.post("/", blogValidator, (req, res, next) => {
-  const errorList = validationResult(req);
+  const errorsList = validationResult(req);
   try {
-    if (errorList.isEmpty()) {
+    if (errorsList.isEmpty()) {
       const newBlog = { ...req.body, createdAt: new Date(), id: unique() };
       const blogsArray = getBlogs();
       blogsArray.push(newBlog);
@@ -56,11 +57,9 @@ blogsRouter.post("/", blogValidator, (req, res, next) => {
       res.status(201).send(newBlog);
     } else {
       next(
-        createHttpError(400, "Some errors occurred in req body", { errorList })
+        createHttpError(400, `Some errors in the req body`, { errorsList })
         //it does not show the error list in the postman response without res.send
       );
-      console.log(errorList);
-      res.send(errorList);
     }
   } catch (error) {
     next(error);
