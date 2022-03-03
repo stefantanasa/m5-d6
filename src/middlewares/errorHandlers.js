@@ -1,9 +1,13 @@
 export const badRequestHandler = (err, req, res, next) => {
   if (err.status === 400) {
     // if status is 400, I'm responsible of sending a response back, otherwise I'm sending the error to the next in chain
-    res
-      .status(400)
-      .send({ message: err.message, errorsList: err.errorsList.array() });
+    if (err.errorsList) {
+      res
+        .status(400)
+        .send({ message: err.message, errorsList: err.errorsList.array() });
+    } else {
+      res.status(400).send({ message: err.message });
+    }
   } else {
     next(err);
   }

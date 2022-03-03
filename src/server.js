@@ -2,6 +2,7 @@ import express from "express";
 import authorsRouters from "./authors/index.js";
 import blogsRouters from "./blogs/index.js";
 import listEndpoints from "express-list-endpoints";
+import { join } from "path";
 import {
   badRequestHandler,
   unauthorizedHandler,
@@ -9,6 +10,7 @@ import {
   genericErrorHandler,
 } from "./middlewares/errorHandlers.js";
 
+const publicPath = join(process.cwd(), "./public");
 const getByIdMiddleware = (req, res, next) => {
   console.log("get middleware");
 
@@ -16,6 +18,7 @@ const getByIdMiddleware = (req, res, next) => {
 };
 const server = express();
 server.use(getByIdMiddleware);
+server.use(express.static(publicPath));
 const port = 3001;
 server.use(express.json());
 server.use("/authors", authorsRouters);

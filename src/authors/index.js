@@ -1,8 +1,12 @@
 import express from "express";
-import fs, { readFileSync } from "fs";
-import { fileURLToPath } from "url";
+import fs from "fs";
+import { fileURLToPath, pathToFileURL } from "url";
 import { dirname, join } from "path";
 import unique from "uniqid";
+import multer from "multer";
+import { saveAuthorAvatar } from "../lib/fs-tools.js";
+import { authorPublicPath } from "../lib/fs-tools.js";
+import { get } from "https";
 
 const authorRouter = express.Router();
 const currentFilePath = fileURLToPath(import.meta.url);
@@ -10,15 +14,83 @@ const parentFolderPath = dirname(currentFilePath);
 const authorsJSONPath = join(parentFolderPath, "authors.json");
 const fileContent = fs.readFileSync(authorsJSONPath);
 
-const authorsArray = JSON.parse(fileContent);
+const writeAuthors = (content) =>
+  fs.writeFileSync(authorsJSONPath, JSON.stringify(content));
+
+const getAuthors = () => JSON.parse(fs.readFileSync(authorsJSONPath));
+console.log(getAuthors());
+authorRouter.post(
+  "/uploadFile",
+  multer().single("avatar"),
+  async (req, res, next) => {
+    try {
+      saveAuthorAvatar(req.file.originalname, req.file.buffer);
+
+      res.status(201).send("File Uploaded!");
+    } catch (error) {
+      console.log("There is an error: ", error);
+      next(error);
+    }
+  }
+);
+authorRouter.post(
+  "/:authorId/uploadFile",
+  multer().single("avatar"),
+  async (req, res, next) => {
+    const url = `${req.protocol}://${req.hostname}:3001/authors/avatar/${req.file.originalname}`;
+
+    try {
+      saveAuthorAvatar(req.file.originalname, req.file.buffer);
+
+      const authorsArray = await getAuthors();
+
+      const index = authorsArray.findIndex(
+        (author) => author.id === req.params.authorId
+      );
+      const updatedAuthor = {
+        ...authorsArray[index],
+        cover: url,
+        updatedAt: new Date(),
+      };
+      authorsArray[index] = updatedAuthor;
+      writeAuthors(authorsArray);
+      console.log("The link was method");
+
+      res.status(201).send("File Uploaded!");
+    } catch (error) {
+      console.log("There is an error: ", error);
+      next(error);
+    }
+  }
+);
+authorRouter.post(
+  "/uploadFiles",
+  multer().array("avatars"),
+  async (req, res, next) => {
+    try {
+      const arrayOfFilesPromises = req.files.map((file) =>
+        saveAuthorAvatar(file.originalname, file.buffer)
+      );
+      await await Promise.all(arrayOfFilesPromises);
+
+      res.status(201).send("Files Uploaded!");
+    } catch (error) {
+      console.log("There is an error: ", error);
+      next(error);
+    }
+  }
+);
+
 authorRouter.get("/", (req, res) => {
-  console.log("FILE CONTENT: ", JSON.parse(fileContent));
-
-  //   console.log(authorsArray);
-
-  res.send(authorsArray);
+  try {
+    const authors = getAuthors();
+    res.send(authors);
+  } catch (error) {
+    next(error);
+  }
 });
 authorRouter.get("/:authorId", (req, res) => {
+  const authorsArray = getAuthors();
   const foundAuthor = authorsArray.find(
     (author) => author.id === req.params.authorId
   );
@@ -35,6 +107,8 @@ authorRouter.get("/:authorId", (req, res) => {
   }
 });
 authorRouter.post("/", (req, res) => {
+  const authorsArray = getAuthors();
+  console.log(authorsArray);
   const newAuthor = { ...req.body, createdAt: new Date(), id: unique() };
   console.log(newAuthor);
   authorsArray.push(newAuthor);
@@ -45,9 +119,11 @@ authorRouter.post("/", (req, res) => {
 });
 
 authorRouter.put("/:authorId", (req, res) => {
+  const authorsArray = getAuthors();
   const index = authorsArray.findIndex(
     (author) => author.id === req.params.authorId
   );
+  console.log(index);
   const updatedUser = {
     ...authorsArray[index],
     ...req.body,

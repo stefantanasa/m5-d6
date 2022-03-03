@@ -66,19 +66,26 @@ blogsRouter.post("/", blogValidator, (req, res, next) => {
   }
 });
 
-blogsRouter.put("/:blogId", (req, res, next) => {
-  const index = blogsArray.findIndex((blog) => blog === req.params.blogId);
+blogsRouter.put("/:blogId", async (req, res, next) => {
+  const blogId = req.params.blogId;
 
-  const updatedBlog = {
-    ...blogsArray[index],
-    ...req.body,
-    updatedAt: new Date(),
-  };
-  blogsArray[index] = updatedBlog;
-  fs.writeFileSync(blogsJSONPath, JSON.stringify(blogsArray));
-  console.log("this is put method");
-  res.send(updatedBlog);
+  const blogs = await getBooks();
+
+  const index = blogs.findIndex((blog) => blog.id === blogId);
+
+  if (index !== -1) {
+    const oldBlog = blogs[index];
+
+    const updatedBlog = { ...oldBlog, ...req.body, updatedAt: new Date() };
+
+    blogs[index] = updatedBlog;
+
+    await writeBlogs(blogs);
+
+    res.send(updatedBlog);
+  }
 });
+
 blogsRouter.delete("/:blogId", (req, res, next) => {
   const remainingBlogs = blogsArray.filter(
     (blog) => blog.id !== req.params.blogId
