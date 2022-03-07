@@ -87,6 +87,7 @@ blogsRouter.put("/:blogId", async (req, res, next) => {
 });
 
 blogsRouter.delete("/:blogId", (req, res, next) => {
+  const blogsArray = getBlogs();
   const remainingBlogs = blogsArray.filter(
     (blog) => blog.id !== req.params.blogId
   );
