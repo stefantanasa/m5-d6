@@ -4,10 +4,18 @@ import { fileURLToPath, pathToFileURL } from "url";
 import { dirname, join } from "path";
 import unique from "uniqid";
 import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { saveAuthorAvatar } from "../lib/fs-tools.js";
 import { authorPublicPath } from "../lib/fs-tools.js";
 import { get } from "https";
 
+const cloudinaryUploader = multer({
+  storage: new CloudinaryStorage({
+    cloudinary,
+    params: { folder: "m5-d6" },
+  }),
+}).single("avatar");
 const authorRouter = express.Router();
 const currentFilePath = fileURLToPath(import.meta.url);
 const parentFolderPath = dirname(currentFilePath);
@@ -19,26 +27,18 @@ const writeAuthors = (content) =>
 
 const getAuthors = () => JSON.parse(fs.readFileSync(authorsJSONPath));
 console.log(getAuthors());
-authorRouter.post(
-  "/uploadFile",
-  multer().single("avatar"),
-  async (req, res, next) => {
-    try {
-      saveAuthorAvatar(req.file.originalname, req.file.buffer);
-
-      res.status(201).send("File Uploaded!");
-    } catch (error) {
-      console.log("There is an error: ", error);
-      next(error);
-    }
+authorRouter.post("/uploadFile", cloudinaryUploader, async (req, res, next) => {
+  try {
+    res.status(201).send("File Uploaded!");
+  } catch (error) {
+    console.log("There is an error: ", error);
+    next(error);
   }
-);
+});
 authorRouter.post(
   "/:authorId/uploadFile",
-  multer().single("avatar"),
+  cloudinaryUploader,
   async (req, res, next) => {
-    const url = `${req.protocol}://${req.hostname}:3001/authors/avatar/${req.file.originalname}`;
-
     try {
       saveAuthorAvatar(req.file.originalname, req.file.buffer);
 
