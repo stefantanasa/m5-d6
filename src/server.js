@@ -9,6 +9,7 @@ import {
   notFoundHandler,
   genericErrorHandler,
 } from "./middlewares/errorHandlers.js";
+import cors from "cors";
 
 const publicPath = join(process.cwd(), "./public");
 const getByIdMiddleware = (req, res, next) => {
@@ -28,6 +29,18 @@ server.use(badRequestHandler);
 server.use(unauthorizedHandler);
 server.use(notFoundHandler);
 server.use(genericErrorHandler);
+server.use(
+  cors({
+    origin: function (origin, next) {
+      console.log("ORIGIN: ", origin);
+      if (!origin || whitelist.indexOf(origin) !== -1) {
+        console.log("Origin allowed!");
+      } else {
+        console.log("Origin NOT allowed!");
+      }
+    },
+  })
+);
 
 console.table(listEndpoints(server));
 server.listen(port, () => {
