@@ -20,7 +20,7 @@ const getByIdMiddleware = (req, res, next) => {
 const server = express();
 server.use(getByIdMiddleware);
 server.use(express.static(publicPath));
-const port = 3001;
+const port = process.env.PORT;
 server.use(express.json());
 server.use("/authors", authorsRouters);
 server.use("/blogs", blogsRouters);
@@ -29,18 +29,7 @@ server.use(badRequestHandler);
 server.use(unauthorizedHandler);
 server.use(notFoundHandler);
 server.use(genericErrorHandler);
-server.use(
-  cors({
-    origin: function (origin, next) {
-      console.log("ORIGIN: ", origin);
-      if (!origin || whitelist.indexOf(origin) !== -1) {
-        console.log("Origin allowed!");
-      } else {
-        console.log("Origin NOT allowed!");
-      }
-    },
-  })
-);
+server.use(cors());
 
 console.table(listEndpoints(server));
 server.listen(port, () => {
