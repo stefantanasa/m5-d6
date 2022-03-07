@@ -19,6 +19,7 @@ const getByIdMiddleware = (req, res, next) => {
   next();
 };
 const server = express();
+const port = process.env.PORT;
 server.use(getByIdMiddleware);
 server.use(express.static(publicPath));
 server.use(express.json());
@@ -30,9 +31,8 @@ server.use(unauthorizedHandler);
 server.use(notFoundHandler);
 server.use(genericErrorHandler);
 server.use(cors());
-const port = process.env.PORT;
 console.table(listEndpoints(server));
 server.listen(port, () => {
   console.log(port);
-  console.log(`server is running on port ${port}`);
+  console.log(`server is running on port ${port} ${process.env.SOMETHING}`);
 });
