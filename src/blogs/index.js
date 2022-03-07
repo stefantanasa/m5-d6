@@ -68,19 +68,18 @@ blogsRouter.post("/", blogValidator, (req, res, next) => {
 
 blogsRouter.put("/:blogId", async (req, res, next) => {
   const blogId = req.params.blogId;
+  const blogsArray = getBlogs();
 
-  const blogs = await getBooks();
-
-  const index = blogs.findIndex((blog) => blog.id === blogId);
+  const index = blogsArray.findIndex((blog) => blog.id === blogId);
 
   if (index !== -1) {
-    const oldBlog = blogs[index];
+    const oldBlog = blogsArray[index];
 
     const updatedBlog = { ...oldBlog, ...req.body, updatedAt: new Date() };
 
-    blogs[index] = updatedBlog;
+    blogsArray[index] = updatedBlog;
 
-    await writeBlogs(blogs);
+    await writeBlogs(blogsArray);
 
     res.send(updatedBlog);
   }
