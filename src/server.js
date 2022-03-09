@@ -1,5 +1,6 @@
 import express from "express";
 import authorsRouters from "./authors/index.js";
+import fileUploadRouters from "./files/index.js";
 import blogsRouters from "./blogs/index.js";
 import listEndpoints from "express-list-endpoints";
 import { join } from "path";
@@ -25,6 +26,7 @@ server.use(express.static(publicPath));
 server.use(express.json());
 server.use("/authors", authorsRouters);
 server.use("/blogs", blogsRouters);
+server.use("/authors", fileUploadRouters);
 
 server.use(badRequestHandler);
 server.use(unauthorizedHandler);

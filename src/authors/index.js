@@ -27,14 +27,14 @@ const writeAuthors = (content) =>
 
 const getAuthors = () => JSON.parse(fs.readFileSync(authorsJSONPath));
 console.log(getAuthors());
-authorRouter.post("/uploadFile", cloudinaryUploader, async (req, res, next) => {
-  try {
-    res.status(201).send(req.file.path);
-  } catch (error) {
-    console.log("There is an error: ", error);
-    next(error);
-  }
-});
+// authorRouter.post("/uploadFile", cloudinaryUploader, async (req, res, next) => {
+//   try {
+//     res.status(201).send(req.file.path);
+//   } catch (error) {
+//     console.log("There is an error: ", error);
+//     next(error);
+//   }
+// });
 authorRouter.post(
   "/:authorId/uploadFile",
   cloudinaryUploader,
@@ -71,7 +71,7 @@ authorRouter.post(
       const arrayOfFilesPromises = req.files.map((file) =>
         saveAuthorAvatar(file.originalname, file.buffer)
       );
-      await await Promise.all(arrayOfFilesPromises);
+      await Promise.all(arrayOfFilesPromises);
 
       res.status(201).send("Files Uploaded!");
     } catch (error) {
