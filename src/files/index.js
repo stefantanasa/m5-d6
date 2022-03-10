@@ -10,6 +10,7 @@ import { saveAuthorAvatar } from "../lib/fs-tools.js";
 import { authorPublicPath } from "../lib/fs-tools.js";
 import { get } from "https";
 import { pipeline } from "stream";
+import { getBlogs } from "../lib/fs-tools.js";
 
 const cloudinaryUploader = multer({
   storage: new CloudinaryStorage({
@@ -37,6 +38,27 @@ fileUploadRoute.get("/downloadPDF", (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+});
+
+fileUploadRoute.get("/:blogId", (req, res, next) => {
+  const blogsArray = getBlogs();
+  const foundBlog = blogsArray.find((blog) => blog.id === req.params.blogId);
+  console.log(foundBlog.category);
+
+  if (foundBlog) {
+    res.setHeader("Content-Disposition", "attachment; filename=example.pdf"); // This header tells the browser to open the "save file on disk" dialog
+
+    const source = getPDFReadableStream(foundBlog.category);
+    const destination = res;
+
+    pipeline(source, destination, (err) => {
+      console.log(err);
+    });
+  } else {
+    {
+      res.status(200).send("blog not found!");
+    }
   }
 });
 
