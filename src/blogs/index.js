@@ -1,21 +1,13 @@
 import express from "express";
 import fs, { readFileSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
+
 import unique from "uniqid";
 import { blogValidator } from "../middlewares/validator.js";
 import createHttpError from "http-errors";
 import { validationResult } from "express-validator";
+import { getBlogs, writeBlogs } from "../lib/fs-tools.js";
 
 const blogsRouter = express.Router();
-
-const blogsJSONPath = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "blogs.json"
-);
-const getBlogs = () => JSON.parse(fs.readFileSync(blogsJSONPath));
-const writeBlogs = (content) =>
-  fs.writeFileSync(blogsJSONPath, JSON.stringify(content));
 
 blogsRouter.get("/", (req, res, next) => {
   const blogsFound = getBlogs();

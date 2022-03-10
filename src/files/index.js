@@ -9,6 +9,7 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { saveAuthorAvatar } from "../lib/fs-tools.js";
 import { authorPublicPath } from "../lib/fs-tools.js";
 import { get } from "https";
+import { pipeline } from "stream";
 
 const cloudinaryUploader = multer({
   storage: new CloudinaryStorage({
@@ -20,47 +21,65 @@ const fileUploadRoute = express.Router();
 const currentFilePath = fileURLToPath(import.meta.url);
 const parentFolderPath = dirname(currentFilePath);
 const authorsJSONPath = join(parentFolderPath, "authors.json");
+import { getPDFReadableStream } from "../lib/pdf-tools.js";
 
-fileUploadRoute.post(
-  "/uploadFile",
-  cloudinaryUploader,
-  async (req, res, next) => {
-    try {
-      res.status(201).send(req.file.path);
-    } catch (error) {
-      console.log("There is an error: ", error);
-      next(error);
-    }
+fileUploadRoute.get("/downloadPDF", (req, res, next) => {
+  try {
+    // SOURCE (readable stream from pdfmake) --> DESTINATION (http response)
+
+    res.setHeader("Content-Disposition", "attachment; filename=example.pdf"); // This header tells the browser to open the "save file on disk" dialog
+
+    const source = getPDFReadableStream("EXAMPLE TEXT");
+    const destination = res;
+
+    pipeline(source, destination, (err) => {
+      console.log(err);
+    });
+  } catch (error) {
+    next(error);
   }
-);
-fileUploadRoute.post(
-  "/:authorId/uploadFile",
-  cloudinaryUploader,
-  async (req, res, next) => {
-    try {
-      saveAuthorAvatar(req.file.originalname, req.file.buffer);
+});
 
-      const authorsArray = await getAuthors();
+// fileUploadRoute.post(
+//   "/uploadFile",
+//   cloudinaryUploader,
+//   async (req, res, next) => {
+//     try {
+//       res.status(201).send(req.file.path);
+//     } catch (error) {
+//       console.log("There is an error: ", error);
+//       next(error);
+//     }
+//   }
+// );
+// fileUploadRoute.post(
+//   "/:authorId/uploadFile",
+//   cloudinaryUploader,
+//   async (req, res, next) => {
+//     try {
+//       saveAuthorAvatar(req.file.originalname, req.file.buffer);
 
-      const index = authorsArray.findIndex(
-        (author) => author.id === req.params.authorId
-      );
-      const updatedAuthor = {
-        ...authorsArray[index],
-        cover: url,
-        updatedAt: new Date(),
-      };
-      authorsArray[index] = updatedAuthor;
-      writeAuthors(authorsArray);
-      console.log("The link was method");
+//       const authorsArray = await getAuthors();
 
-      res.status(201).send("File Uploaded!");
-    } catch (error) {
-      console.log("There is an error: ", error);
-      next(error);
-    }
-  }
-);
+//       const index = authorsArray.findIndex(
+//         (author) => author.id === req.params.authorId
+//       );
+//       const updatedAuthor = {
+//         ...authorsArray[index],
+//         cover: url,
+//         updatedAt: new Date(),
+//       };
+//       authorsArray[index] = updatedAuthor;
+//       writeAuthors(authorsArray);
+//       console.log("The link was method");
+
+//       res.status(201).send("File Uploaded!");
+//     } catch (error) {
+//       console.log("There is an error: ", error);
+//       next(error);
+//     }
+//   }
+// );
 // fileUploadRoute.post(
 //   "/uploadFiles",
 //   multer().array("avatars"),

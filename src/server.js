@@ -27,6 +27,7 @@ server.use(express.json());
 server.use("/authors", authorsRouters);
 server.use("/blogs", blogsRouters);
 server.use("/authors", fileUploadRouters);
+server.use("/pdf", fileUploadRouters);
 
 server.use(badRequestHandler);
 server.use(unauthorizedHandler);
