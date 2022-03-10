@@ -6,6 +6,8 @@ import { blogValidator } from "../middlewares/validator.js";
 import createHttpError from "http-errors";
 import { validationResult } from "express-validator";
 import { getBlogs, writeBlogs } from "../lib/fs-tools.js";
+import { generateBlogPDF } from "../pdf/index.js";
+import { pipeline } from "stream";
 
 const blogsRouter = express.Router();
 
@@ -23,19 +25,6 @@ blogsRouter.get("/", (req, res, next) => {
   }
 });
 
-blogsRouter.get("/", (req, res, next) => {
-  const blogsFound = getBlogs();
-  try {
-    if (blogsFound.length === 0) {
-      next(createHttpError(404, "Blogs not found"));
-      res.send("blogs not found");
-    } else {
-      res.send(blogsFound);
-    }
-  } catch (error) {
-    next(createHttpError(404, "Blogs not founded"));
-  }
-});
 blogsRouter.get("/:blogId", (req, res, next) => {
   const blogsArray = getBlogs();
   const foundBlog = blogsArray.find((blog) => blog.id === req.params.blogId);
@@ -52,6 +41,30 @@ blogsRouter.get("/:blogId", (req, res, next) => {
   }
 });
 
+blogsRouter.get("/:blogId/pdf", async (req, res, next) => {
+  try {
+    const blogsArray = getBlogs();
+    const foundBlog = blogsArray.find((blog) => blog.id === req.params.blogId);
+
+    if (!foundBlog) {
+      res
+        .status(404)
+        .send({ message: `blog with ${req.params.id} is not found!` });
+    }
+    const pdfStream = await generateBlogPDF(foundBlog);
+
+    res.setHeader("Content-Type", "application/pdf");
+    pipeline(pdfStream, res, (err) => {
+      if (err) {
+        console.log(err);
+      }
+    });
+
+    pdfStream.end();
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+});
 blogsRouter.post("/", blogValidator, (req, res, next) => {
   const errorsList = validationResult(req);
   try {
