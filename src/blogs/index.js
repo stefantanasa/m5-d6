@@ -22,6 +22,20 @@ blogsRouter.get("/", (req, res, next) => {
     next(createHttpError(404, "Blogs not founded"));
   }
 });
+
+blogsRouter.get("/", (req, res, next) => {
+  const blogsFound = getBlogs();
+  try {
+    if (blogsFound.length === 0) {
+      next(createHttpError(404, "Blogs not found"));
+      res.send("blogs not found");
+    } else {
+      res.send(blogsFound);
+    }
+  } catch (error) {
+    next(createHttpError(404, "Blogs not founded"));
+  }
+});
 blogsRouter.get("/:blogId", (req, res, next) => {
   const blogsArray = getBlogs();
   const foundBlog = blogsArray.find((blog) => blog.id === req.params.blogId);
